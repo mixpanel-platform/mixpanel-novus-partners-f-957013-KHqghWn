@@ -9,7 +9,43 @@
   <body class="mixpanel-platform-body">
     <h1>Hello, World!</h1>
     <script>
-      // Run queries and display results here
+      var day = '2016-05-15'
+      var activeEvent = 'Feature Usage'
+      
+      //1: Total Usage Percentage
+      var overallUsage = []
+      //Get Active Users for given day
+      var actives = new Promise(function(resolve, reject){
+        MP.api.segment(activeEvent, undefined, {type: 'unique', from: day, to: day, unit: 'day'}).done(function(results){
+          resolve(results.values());
+        })  
+      })
+      overallUsage.push(actives);
+      
+      //Get Historical Users for given day
+      var totals = new Promise(function(resolve, reject){
+        MP.api.segment('~totalusers', 'Grand Total', {method: 'sum', from: day, to: day}).done(function(results){
+          resolve(results.values());
+        })
+      })
+      overallUsage.push(totals);
+      
+      Promise.all(overallUsage).then(function(data){
+          var activeUsers = data[0][activeEvent]
+          var totalUsers = data[1]
+          console.log(activeUsers)
+          console.log(totalUsers)
+          for (var date in activeUsers) {
+            var percentActive = 100*(activeUsers[date] / totalUsers[date])
+            console.log(date, percentActive)
+          }
+      })
+      
+      
+      //2: Usage by AE
+      
+      //3: Usage by Company
+      
     </script>
   </body>
 </html>
